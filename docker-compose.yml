@@ -1,0 +1,11 @@
+version: '3'
+services:
+  chatbot:
+    build: .
+    container_name: chatbot
+    platform: 'linux/amd64'
+    ports:
+      - "8501:8501"
+    command: [ "streamlit", "run", "src/gui.py", "--server.port=8501", "--server.address=0.0.0.0" ]
+    volumes:
+      - .:/workspace
