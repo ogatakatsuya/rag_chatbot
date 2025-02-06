@@ -16,7 +16,7 @@ def main():
         st.session_state.chat_history.append(Message(role="user", content=prompt))
 
         # LLM からの応答を取得
-        response = llm.get_response(prompt)
+        response: str = llm.get_response_with_context(st.session_state.chat_history)
         st.session_state.chat_history.append(
             Message(role="assistant", content=response)
         )
