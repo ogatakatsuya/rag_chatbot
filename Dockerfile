@@ -6,6 +6,7 @@ WORKDIR /workspace/
 # poetryをpackage-modeで使っているため、README.mdがないとpoetry installに失敗する
 COPY pyproject.toml poetry.lock README.md .env /workspace/
 COPY src/ /workspace/src/
+COPY data/ /workspace/data/
 
 ENV POETRY_VERSION=1.8.2 \
     POETRY_HOME="/root/.local" \
