@@ -23,10 +23,14 @@ def load_and_embed_csv():
     embeddings = []
     for _, row in data.iterrows():
         # ここで前処理(今は適当に行を連結するのみ)
-        text = " ".join(map(str, row.values))
+        text = (
+            f"{row['開講所属']}が開講する科目である科目番号{row['科目番号']}の「{row['開講科目名']}」は、"
+            f"{row['開講区分']}に開講され、{row['曜日・時間']}に行われる。対象は{row['年次']}生であり、"
+            f"{row['授業の目的と概要']} 本講義の履修には、{row['履修条件・受講条件']}。"
+        )
         # 一番安いモデルで埋め込み
         response = client.embeddings.create(input=text, model="text-embedding-3-small")
-        embedding_vector = response["data"][0]["embedding"]
+        embedding_vector = response.data[0].embedding
         embeddings.append({"text": text, "embedding": embedding_vector})
 
     # とりまJSONに保存
