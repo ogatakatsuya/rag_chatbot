@@ -13,6 +13,8 @@ google-genai = "^1.0.0"
 python-dotenv = "^1.0.1"
 openai = "^1.61.1"
 pandas = "^2.2.3"
+faiss-cpu = "^1.10.0"
+numpy = "^2.2.2"
 
 [build-system]
 requires = ["poetry-core"]
