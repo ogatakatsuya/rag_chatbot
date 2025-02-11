@@ -1,11 +1,11 @@
 import os
 
+from dotenv import load_dotenv
 from google import genai
 from openai import OpenAI
-from dotenv import load_dotenv
 
-from src.prompt import SYSTEM_PROMPT
 from src.model import Message
+from src.prompt import SYSTEM_PROMPT
 
 load_dotenv()
 
@@ -33,13 +33,14 @@ class LLM:
         )
         return response.text
 
-    def get_response_with_context(self, context: list[Message]) -> str:
+    def get_response_with_context(self, context: list[Message], placeholder) -> str:
         """
         会話の文脈を考慮してLLMから返答文を取得する
 
         Args:
-            context(list[Message]): 会話履歴
-        Returns;
+            context (list[Message]): 会話履歴
+            placeholder (): Streamlit のプレースホルダー
+        Returns:
             str: LLMが生成した返答文
         """
         prompt = [Message(role="system", content=SYSTEM_PROMPT)] + context
@@ -47,5 +48,14 @@ class LLM:
             model=self.model,
             n=1,
             messages=[message.cast_to_openai_schema() for message in prompt],
+            stream=True,
         )
-        return response.choices[0].message.content
+
+        accumulated_text = ""
+        for chunk in response:
+            delta_content = chunk.choices[0].delta.content
+            if delta_content:
+                accumulated_text += delta_content
+                placeholder.markdown(accumulated_text)
+
+        return accumulated_text
