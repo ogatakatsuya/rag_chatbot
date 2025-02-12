@@ -7,8 +7,6 @@ import numpy as np
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from src.model import Message
-
 load_dotenv()
 
 
@@ -66,8 +64,8 @@ class RagService:
         index.add(embeddings)
         return index
 
-    def _format_docs(self, docs: list[Message]) -> str:
-        return "\n\n".join(doc.contents for doc in docs)
+    def _format_docs(self, docs: list[str]) -> str:
+        return "\n\n".join(docs)
 
 
 if __name__ == "__main__":
