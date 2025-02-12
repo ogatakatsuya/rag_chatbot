@@ -1,11 +1,14 @@
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 from google import genai
+from jinja2 import Template
 from openai import OpenAI
 
 from src.model import Message
 from src.prompt import SYSTEM_PROMPT
+from src.rag import RagService
 
 load_dotenv()
 
@@ -18,6 +21,7 @@ class LLM:
             base_url="https://generativelanguage.googleapis.com/v1beta/",
         )
         self.model = "gemini-2.0-flash-exp"
+        self.rag_client = RagService(Path("../data/class_data_embeddings.json"))
 
     def get_response(self, prompt: str) -> str:
         """
@@ -43,7 +47,10 @@ class LLM:
         Returns:
             str: LLMが生成した返答文
         """
-        prompt = [Message(role="system", content=SYSTEM_PROMPT)] + context
+        # queryを用いてRAGで検索
+        rag_result = self.rag_client.search(context[-1].content)
+        sysytem_prompt = Template(SYSTEM_PROMPT).render(rag_result=rag_result)
+        prompt = [Message(role="system", content=sysytem_prompt)] + context
         response = self.openai_client.chat.completions.create(
             model=self.model,
             n=1,
