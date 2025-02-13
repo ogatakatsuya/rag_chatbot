@@ -1,10 +1,11 @@
 import os
 from pathlib import Path
 
+import streamlit as st
 from dotenv import load_dotenv
 from google import genai
 from jinja2 import Template
-from openai import OpenAI
+from openai import OpenAI, RateLimitError
 
 from src.model import Message
 from src.prompt import SYSTEM_PROMPT
@@ -51,12 +52,16 @@ class LLM:
         rag_result = self.rag_client.search(context[-1].content)
         sysytem_prompt = Template(SYSTEM_PROMPT).render(rag_result=rag_result)
         prompt = [Message(role="system", content=sysytem_prompt)] + context
-        response = self.openai_client.chat.completions.create(
-            model=self.model,
-            n=1,
-            messages=[message.cast_to_openai_schema() for message in prompt],
-            stream=True,
-        )
+        try:
+            response = self.openai_client.chat.completions.create(
+                model=self.model,
+                n=1,
+                messages=[message.cast_to_openai_schema() for message in prompt],
+                stream=True,
+            )
+        except RateLimitError:
+            st.error("Rate Limit Error: 時間を置いて再度お試しください")
+            return ""
 
         accumulated_text = ""
         for chunk in response:
