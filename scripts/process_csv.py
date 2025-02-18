@@ -17,6 +17,9 @@ def load_and_embed_csv():
     csv_path = Path("..") / "data" / "class_data.csv"
     data = pd.read_csv(csv_path)
 
+    # 曜日・時間の整形
+    data["曜日・時間"] = data["曜日・時間"].apply(format_schedule)
+
     # OpenAIクライアントの初期化
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -39,6 +42,54 @@ def load_and_embed_csv():
         json.dump(embeddings, f, ensure_ascii=False, indent=4)
 
     print(f"埋め込みデータを {output_path} に保存しました。")
+
+def format_schedule(schedule: str) -> str:
+    """
+    曜日・時間の文字列を整形する
+
+    Args:
+        schedule (str): 曜日・時間の文字列
+
+    Returns:
+        str: 整形された曜日・時間の文字列
+    """
+
+    # 曜日変換用の辞書
+    day_dict = {
+        "月": "月曜日",
+        "火": "火曜日",
+        "水": "水曜日",
+        "木": "木曜日",
+        "金": "金曜日",
+        "土": "土曜日",
+        "日": "日曜日",
+    }
+
+    
+    schedule = schedule.strip().replace("\t", "")
+
+    parts = schedule.split(",")
+    formatted_parts = []
+    for part in parts:
+        part = part.strip() 
+        
+        if not part: 
+            continue
+
+        day = part[0]
+        time = part[1:]
+
+        if day not in day_dict:
+            print(f"Warning: 不明な曜日データ '{day}' をスキップ")
+            continue
+
+        if not time.isdigit():
+            print(f"Warning: 不明な時間データ '{time}' をスキップ")
+            continue
+
+        formatted_parts.append(f"{day_dict[day]}{time}時間目")
+
+    return "、".join(formatted_parts)
 
 
 if __name__ == "__main__":

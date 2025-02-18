@@ -72,8 +72,6 @@ if __name__ == "__main__":
     path = Path("../data/class_data_embeddings.json")
     rag = RagService(path)
     # print(rag.class_data)
-    query = "情報科学演習の内容を教えて"
+    query = "火曜日に開講している授業を教えて"
     results = rag.search(query)
-    for result in results:
-        print(result)
-        print("=" * 50)
+    print(results)
