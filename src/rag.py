@@ -11,8 +11,9 @@ load_dotenv()
 
 
 class RagService:
-    def __init__(self, path: Path):
-        self.class_data = json.loads(path.read_text(encoding="utf-8"))
+    def __init__(self, embed_file_path: Path, full_text_file_path: Path):
+        self.class_data = json.loads(embed_file_path.read_text(encoding="utf-8"))
+        self.full_text_data = json.loads(full_text_file_path.read_text(encoding="utf-8"))
         self.dim = len(self.class_data[0]["embedding"])
         self.faiss_index = self._create_faiss_index(self.dim)
 
@@ -28,11 +29,17 @@ class RagService:
             str: フォーマットされた検索結果
         """
         query_embedding = self._embedding_query(query).reshape(1, -1)
-        _, indices = self.faiss_index.search(query_embedding, n_results)
+        distances, indices = self.faiss_index.search(query_embedding, n_results * 4)
 
-        results = []
+        results_index = set()
         for index in indices[0]:
-            results.append(self.class_data[index]["text"])
+            results_index.add(self.class_data[index]["full_text_id"])
+            if len(results_index) >= n_results:
+                break
+        
+        results = []
+        for index in results_index:
+            results.append(self.full_text_data[index]["text"])
         return self._format_docs(results)
 
     def _embedding_query(self, query: str):
@@ -69,9 +76,10 @@ class RagService:
 
 
 if __name__ == "__main__":
-    path = Path("../data/class_data_embeddings.json")
-    rag = RagService(path)
-    # print(rag.class_data)
-    query = "火曜日に開講している授業を教えて"
+    embed_path = Path("../data/class_data_embeddings.json")
+    full_text_path = Path("../data/class_data_full_texts.json")
+    rag = RagService(embed_path, full_text_path)
+    query = "データベースを学べる授業を教えて"
     results = rag.search(query)
+    print(f"query: {query}")
     print(results)

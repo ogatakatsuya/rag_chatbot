@@ -24,17 +24,36 @@ def load_and_embed_csv():
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     embeddings = []
-    for _, row in data.iterrows():
-        # ここで前処理(今は適当に行を連結するのみ)
-        text = (
+    full_texts = []
+
+    for i, row in data.iterrows():
+        # 前処理: 1授業につき全文と履修の情報と履修の内容の3種類を埋め込み
+        full_text = (
             f"{row['開講所属']}が開講する科目である科目番号{row['科目番号']}の「{row['開講科目名']}」は、"
             f"{row['開講区分']}に開講され、{row['曜日・時間']}に行われる。対象は{row['年次']}生であり、"
             f"{row['授業の目的と概要']} 本講義の履修には、{row['履修条件・受講条件']}。"
         )
+        info_text = (
+            f"{row['開講所属']}が開講する科目である科目番号{row['科目番号']}の「{row['開講科目名']}」は、"
+            f"{row['開講区分']}に開講され、{row['曜日・時間']}に行われる。対象は{row['年次']}生であり、"
+            f"本講義の履修には、{row['履修条件・受講条件']}。"
+        )
+        date_text = (
+            f"{row['曜日・時間']}に開講される授業である。"
+        )
+        content_text = (
+            f"「{row['開講科目名']}」は、"
+            f"{row['授業の目的と概要']} "
+        )
+
+        texts = [full_text, info_text, date_text, content_text]
         # 一番安いモデルで埋め込み
-        response = client.embeddings.create(input=text, model="text-embedding-3-small")
-        embedding_vector = response.data[0].embedding
-        embeddings.append({"text": text, "embedding": embedding_vector})
+        for text in texts:
+            response = client.embeddings.create(input=text, model="text-embedding-3-small")
+            embedding_vector = response.data[0].embedding
+            embeddings.append({"text": text, "embedding": embedding_vector, "full_text_id" : i})
+
+        full_texts.append({"text": full_text})
 
     # とりまJSONに保存
     output_path = Path("..") / "data" / "class_data_embeddings.json"
@@ -42,6 +61,12 @@ def load_and_embed_csv():
         json.dump(embeddings, f, ensure_ascii=False, indent=4)
 
     print(f"埋め込みデータを {output_path} に保存しました。")
+
+    output_path = Path("..") / "data" / "class_data_full_texts.json"
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(full_texts, f, ensure_ascii=False, indent=4)
+    
+    print(f"全文データを {output_path} に保存しました。")
 
 def format_schedule(schedule: str) -> str:
     """
