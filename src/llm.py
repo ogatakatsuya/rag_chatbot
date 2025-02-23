@@ -22,7 +22,7 @@ class LLM:
             base_url="https://generativelanguage.googleapis.com/v1beta/",
         )
         self.model = "gemini-2.0-flash-exp"
-        self.rag_client = RagService(Path("./data/class_data_embeddings.json"))
+        self.rag_client = RagService(Path("./data/class_data_embeddings.json"), Path("./data/class_data_full_texts.json"))
 
     def get_response(self, prompt: str) -> str:
         """
