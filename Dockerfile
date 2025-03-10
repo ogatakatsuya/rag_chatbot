@@ -7,6 +7,7 @@ WORKDIR /workspace/
 COPY pyproject.toml poetry.lock README.md .env /workspace/
 COPY src/ /workspace/src/
 COPY data/ /workspace/data/
+COPY rag/ /workspace/rag/
 
 ENV POETRY_VERSION=1.8.2 \
     POETRY_HOME="/root/.local" \

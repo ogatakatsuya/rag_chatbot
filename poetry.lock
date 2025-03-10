@@ -2066,6 +2066,16 @@ docs = ["Sphinx (>=6.0)", "myst-parser (>=2.0.0)", "sphinx-rtd-theme (>=1.1.0)"]
 optional = ["python-socks", "wsaccel"]
 test = ["websockets"]
 
+name = "weaviate"
+version = "0.1.2"
+description = "A placeholder package for the Weaviate name"
+optional = false
+python-versions = "*"
+files = [
+    {file = "weaviate-0.1.2-py3-none-any.whl", hash = "sha256:40f1c1cf0b769036315d2b6026c8cd823a3a6e951c90d4e70a001a770ba8a444"},
+    {file = "weaviate-0.1.2.tar.gz", hash = "sha256:a381b8bb0eb236bd10256def8612953ed9024e6738b8a259e7ec11e626ae0665"},
+]
+
 [[package]]
 name = "websockets"
 version = "14.2"
@@ -2165,4 +2175,4 @@ h11 = ">=0.9.0,<1"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "5b568c26b400bbe9a0ee0cfeaf7cd5247c50bf1cadefefccb555b1f70ec65826"
+content-hash = "baa4144eee34041360aa960d3f8162240de75501c1595ddcb2dafded145bb64d"
