@@ -1,8 +1,9 @@
 from weaviate.classes.query import MetadataQuery
 from weaviate.collections.classes.internal import QueryReturn
+from weaviate.classes.query import Filter
 
 from rag.model import ClassInfo
-from src.rag.client import client
+from rag.client import client
 
 
 def search(
@@ -134,12 +135,31 @@ def search_bm25(
 
     return [ClassInfo(**obj.properties) for obj in response.objects]  # type: ignore
 
+def search_course_code(course_code: int):
+    """
+    コースコードで検索し、full_textを返す
+    """
+    collection = client.collections.get("Class_data_full_text")
+
+    response = collection.query.fetch_objects(
+        filters=Filter.by_property("course_code").equal(course_code),
+        limit=1  # 1件だけ取得
+    )
+
+    assert isinstance(response, QueryReturn)
+
+    return response.objects[0].properties["text"]
+
+
 
 if __name__ == "__main__":
     queries = ["プログラミング", "統計"]
     for query in queries:
-        print(search(query, 1))
-        print(search_with_filter(query, 1))
-        print(search_hybrid(query, 1))
-        print(search_bm25(query, 1))
+        results = search(query, 1, "class_data_vector")
+        for result in results:
+            print(search_course_code(result.course_code))
+        #print(search(query, 1, "class_data_vector"))
+        # print(search_with_filter(query, 1, "class_data_vector"))
+        # print(search_hybrid(query, 1, "class_data_vector"))
+        # print(search_bm25(query, 1, "class_data_vector"))
     client.close()
