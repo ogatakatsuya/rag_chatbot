@@ -2,7 +2,7 @@ from weaviate.collections.collection import Collection
 
 from rag.client import client
 from rag.model import ClassInfo
-from rag.setup import setup
+from rag.setup import vector_db_setup, full_text_db_setup
 
 
 def insert(
@@ -25,6 +25,6 @@ if __name__ == "__main__":
         ClassInfo(class_name="src/data/dog.png", info="This is a picture of dog"),
         ClassInfo(class_name="src/data/cat.png", info="This is a picture of cat"),
     ]
-    collection = setup("text_search_model_sample")
+    collection = vector_db_setup("text_search_model_sample")
     insert(collection, data)
     client.close()
