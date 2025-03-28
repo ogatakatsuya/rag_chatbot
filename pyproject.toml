@@ -4,7 +4,12 @@ version = "0.1.0"
 description = ""
 authors = ["Ogata Katsuya <130939004+ogatakatsuya@users.noreply.github.com>"]
 readme = "README.md"
-packages = [{ include = "src" }, { include = "rag" }]
+packages = [
+    { include = "src" }, 
+    { include = "rag" },
+    { include = "lib" },
+    { include = "supabase_rag" }
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"

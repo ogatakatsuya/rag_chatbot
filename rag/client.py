@@ -1,17 +1,14 @@
-import os
-
 import weaviate
-from dotenv import load_dotenv
 from weaviate.config import AdditionalConfig, ConnectionConfig
 
-load_dotenv()
+from lib.env import env
 
 client = weaviate.connect_to_local(
-    #host="localhost", #vscodeで実行するとき
-    host="weaviate", # streamlitで実行するとき
+    # host="localhost", #vscodeで実行するとき
+    host="weaviate",  # streamlitで実行するとき
     port=8080,
     grpc_port=50051,
-    headers={"X-OpenAI-Api-Key": os.environ["OPENAI_API_KEY"]},
+    headers={"X-OpenAI-Api-Key": env.OPENAI_API_KEY},
     additional_config=AdditionalConfig(
         connection=ConnectionConfig(
             session_pool_connections=30,

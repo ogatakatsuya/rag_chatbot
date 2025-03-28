@@ -1,12 +1,10 @@
-import os
-from pathlib import Path
-
 import streamlit as st
 from dotenv import load_dotenv
 from google import genai
 from jinja2 import Template
 from openai import OpenAI, RateLimitError
 
+from lib.env import env
 from src.model import Message
 from src.prompt import SYSTEM_PROMPT
 from src.rag_searvice import RagService
@@ -16,9 +14,9 @@ load_dotenv()
 
 class LLM:
     def __init__(self):
-        self.gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+        self.gemini_client = genai.Client(api_key=env.GEMINI_API_KEY)
         self.openai_client = OpenAI(
-            api_key=os.getenv("GEMINI_API_KEY"),
+            api_key=env.GEMINI_API_KEY,
             base_url="https://generativelanguage.googleapis.com/v1beta/",
         )
         self.model = "gemini-2.0-flash-exp"
