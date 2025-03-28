@@ -9,7 +9,7 @@ from openai import OpenAI, RateLimitError
 
 from src.model import Message
 from src.prompt import SYSTEM_PROMPT
-from src.rag import RagService
+from src.rag_searvice import RagService
 
 load_dotenv()
 
@@ -22,7 +22,10 @@ class LLM:
             base_url="https://generativelanguage.googleapis.com/v1beta/",
         )
         self.model = "gemini-2.0-flash-exp"
-        self.rag_client = RagService(Path("./data/class_data_embeddings.json"), Path("./data/class_data_full_texts.json"))
+        self.rag_client = RagService(
+            embed_collection_name="class_data_vector",
+            full_text_collection_name="class_data_full_text",
+        )
 
     def get_response(self, prompt: str) -> str:
         """

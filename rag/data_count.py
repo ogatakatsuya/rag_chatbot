@@ -1,6 +1,10 @@
 from rag.client import client
+#デバッグ用
 
+collection_list = client.collections.list_all()
 
+for collection in collection_list:
+    print(collection)
 collection_name = "class_data_full_text"
 
 collection = client.collections.get(collection_name)
