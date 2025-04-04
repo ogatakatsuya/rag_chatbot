@@ -26,14 +26,14 @@ class Rag(metaclass=ABCMeta):
         raise NotImplementedError()
 
     @abstractmethod
-    async def insert_category(self, data: str):
+    async def insert_category(self, name: str):
         """
         DBに履修区分を挿入するメソッド
         """
         raise NotImplementedError()
 
     @abstractmethod
-    async def insert_full_text(self, data: str):
+    async def insert_full_text(self, text: str):
         """
         DBに履修情報の全文を挿入するメソッド
         """
@@ -72,11 +72,11 @@ class RagV1(Rag):
             )
         )
 
-    async def insert_category(self, data: Category) -> int:
-        return await self.insert_client.insert_category(data)
+    async def insert_category(self, name: str) -> int:
+        return await self.insert_client.insert_category(Category(name=name))
 
-    async def insert_full_text(self, data: FullText) -> int:
-        return await self.insert_client.insert_full_text(data)
+    async def insert_full_text(self, text: str) -> int:
+        return await self.insert_client.insert_full_text(FullText(content=text))
 
     async def search(self, query: str, category_name: str):
         embedding = self.embedding_client.exec(query)
@@ -99,8 +99,8 @@ async def main():
         "Example Document 4",
         "Example Document 5",
     ]
-    category_id = await rag.insert_category(Category(name="Example Category"))
-    full_text_id = await rag.insert_full_text(FullText(content="Example Full Text"))
+    category_id = await rag.insert_category("Example Category")
+    full_text_id = await rag.insert_full_text("Example Full Text")
     for doc in documents:
         document_id = await rag.insert_document(
             text=doc, category_id=category_id, full_text_id=full_text_id
