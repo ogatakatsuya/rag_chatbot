@@ -14,30 +14,36 @@ class Insert(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def insert_document(self, data: Document, table_name: str):
+    async def insert_document(
+        self, data: Document, table_name: str = "documents"
+    ) -> int:
         """
         DBに履修情報を挿入するメソッド
         """
-        pass
+        raise NotImplementedError()
 
     @abstractmethod
-    def insert_category(self, data: Category, table_name: str):
+    async def insert_category(
+        self, data: Category, table_name: str = "categories"
+    ) -> int:
         """
         DBに履修区分を挿入するメソッド
         """
-        pass
+        raise NotImplementedError()
 
     @abstractmethod
-    def insert_fulltext(self, data: FullText, table_name: str):
+    async def insert_full_text(
+        self, data: FullText, table_name: str = "full_texts"
+    ) -> int:
         """
         DBに履修情報の全文を挿入するメソッド
         """
-        pass
+        raise NotImplementedError()
 
 
-class InsertSupbase(Insert):
+class InsertSupabase(Insert):
     """
-    supabaseのdbクライアント
+    supabaseのinsert用クライアント
     """
 
     def __init__(self, client: AsyncClient):
@@ -49,20 +55,32 @@ class InsertSupbase(Insert):
         conn = await client.get_client()
         return cls(conn)
 
-    async def insert_document(self, data: Document, table_name: str = "documents"):
-        return await self.client.table(table_name).insert(data.model_dump()).execute()
+    async def insert_document(
+        self, data: Document, table_name: str = "documents"
+    ) -> int:
+        result = await self.client.table(table_name).insert(data.model_dump()).execute()
+        return result.data[0]["id"]
 
-    async def insert_category(self, data: Category, table_name: str = "categories"):
-        return await self.client.table(table_name).insert(data.model_dump()).execute()
+    async def insert_category(
+        self, data: Category, table_name: str = "categories"
+    ) -> int:
+        result = await self.client.table(table_name).insert(data.model_dump()).execute()
+        return result.data[0]["id"]
 
-    async def insert_fulltext(self, data: FullText, table_name: str = "full_texts"):
-        return await self.client.table(table_name).insert(data.model_dump()).execute()
+    async def insert_full_text(
+        self, data: FullText, table_name: str = "full_texts"
+    ) -> int:
+        result = await self.client.table(table_name).insert(data.model_dump()).execute()
+        return result.data[0]["id"]
 
 
 async def main():
+    """デバッグ用"""
     db_conn = SupabaseClient()
-    inser_client = await InsertSupbase.new(db_conn)
-    await inser_client.insert_category(data=Category(name="test_category"))
+    inser_client = await InsertSupabase.new(db_conn)
+    result = await inser_client.insert_category(data=Category(name="test_category"))
+    # data=[{'id': 2, 'name': 'test_category'}] count=None
+    print(result)
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ class DBAsyncClient(metaclass=ABCMeta):
         """
         DBクライアントを取得するメソッド
         """
-        pass
+        raise NotImplementedError()
 
 
 class SupabaseClient(DBAsyncClient):

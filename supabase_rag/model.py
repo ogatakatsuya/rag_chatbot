@@ -55,7 +55,8 @@ class Document(BaseModel):
 
     Attributes:
         content(str): ドキュメントの内容
-        metadata(Metadata): ドキュメントのメタデータ
+        category_id(int): 履修区分のID
+        full_text_id(int): 履修情報のID
         embedding(list[float]): ドキュメントの埋め込み
     """
 
