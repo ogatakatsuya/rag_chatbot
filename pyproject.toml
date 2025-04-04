@@ -4,7 +4,11 @@ version = "0.1.0"
 description = ""
 authors = ["Ogata Katsuya <130939004+ogatakatsuya@users.noreply.github.com>"]
 readme = "README.md"
-packages = [{ include = "src" }, { include = "rag" }]
+packages = [
+    { include = "src" }, 
+    { include = "rag" },
+    { include = "lib" }
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -20,6 +24,8 @@ beautifulsoup4 = "^4.13.3"
 selenium = "^4.29.0"
 weaviate = "^0.1.2"
 weaviate-client = "^4.11.2"
+supabase = "^2.15.0"
+pydantic-settings = "^2.8.1"
 
 [build-system]
 requires = ["poetry-core"]

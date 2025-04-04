@@ -24,6 +24,6 @@ services:
       ENABLE_MODULES: "text2vec-openai"
       CLUSTER_HOSTNAME: "node1"
     volumes:
-      - weaviate_data:/var/lib/weaviate  # 名前付きボリュームを作成し、マウント
+      - weaviate_data:/var/lib/weaviate # 名前付きボリュームを作成し、マウント
 volumes:
   weaviate_data: # 名前付きボリュームを定義

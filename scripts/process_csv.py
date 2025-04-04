@@ -1,12 +1,10 @@
 import json
-import os
 from pathlib import Path
 
 import pandas as pd
-from dotenv import load_dotenv
 from openai import OpenAI
 
-load_dotenv()
+from lib.env import env
 
 
 def load_and_embed_csv():
@@ -21,7 +19,7 @@ def load_and_embed_csv():
     data["曜日・時間"] = data["曜日・時間"].apply(format_schedule)
 
     # OpenAIクライアントの初期化
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    client = OpenAI(api_key=env.OPENAI_API_KEY)
 
     embeddings = []
     full_texts = []
@@ -38,20 +36,19 @@ def load_and_embed_csv():
             f"{row['開講区分']}に開講され、{row['曜日・時間']}に行われる。対象は{row['年次']}生であり、"
             f"本講義の履修には、{row['履修条件・受講条件']}。"
         )
-        date_text = (
-            f"{row['曜日・時間']}に開講される授業である。"
-        )
-        content_text = (
-            f"「{row['開講科目名']}」は、"
-            f"{row['授業の目的と概要']} "
-        )
+        date_text = f"{row['曜日・時間']}に開講される授業である。"
+        content_text = f"「{row['開講科目名']}」は、{row['授業の目的と概要']} "
 
         texts = [full_text, info_text, date_text, content_text]
         # 一番安いモデルで埋め込み
         for text in texts:
-            response = client.embeddings.create(input=text, model="text-embedding-3-small")
+            response = client.embeddings.create(
+                input=text, model="text-embedding-3-small"
+            )
             embedding_vector = response.data[0].embedding
-            embeddings.append({"text": text, "embedding": embedding_vector, "full_text_id" : i})
+            embeddings.append(
+                {"text": text, "embedding": embedding_vector, "full_text_id": i}
+            )
 
         full_texts.append({"text": full_text})
 
@@ -65,8 +62,9 @@ def load_and_embed_csv():
     output_path = Path("..") / "data" / "class_data_full_texts.json"
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(full_texts, f, ensure_ascii=False, indent=4)
-    
+
     print(f"全文データを {output_path} に保存しました。")
+
 
 def format_schedule(schedule: str) -> str:
     """
@@ -90,15 +88,14 @@ def format_schedule(schedule: str) -> str:
         "日": "日曜日",
     }
 
-    
     schedule = schedule.strip().replace("\t", "")
 
     parts = schedule.split(",")
     formatted_parts = []
     for part in parts:
-        part = part.strip() 
-        
-        if not part: 
+        part = part.strip()
+
+        if not part:
             continue
 
         day = part[0]
