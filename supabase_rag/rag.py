@@ -120,8 +120,8 @@ async def main2():
         query="スポーツ",
         category_name="全学教育推進機構",
     )
-    for index, item in enumerate(result):
-        print(f"result{index} : {item.content}")
+    for item in result:
+        print(f"result{item.id} : {item.content}")
 
 
 if __name__ == "__main__":
