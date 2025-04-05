@@ -1,20 +1,17 @@
-from pathlib import Path
+import asyncio
 
-import pandas as pd
 import streamlit as st
 
-from src.llm import LLM
+from src.llm import LLM, GeminiLLM
 from src.model import Message
+from supabase_rag.client import SupabaseClient
+from supabase_rag.embedding import OpenAIEmbedding
+from supabase_rag.insert import InsertSupabase
+from supabase_rag.rag import Rag, RagV1
+from supabase_rag.search import SearchSupabase
 
 
-@st.cache_data
-def load_csv():
-    """CSVデータを読み込む"""
-    df = pd.read_csv(Path("./data/class_data.csv"))
-    return df
-
-
-def chat_page(llm: LLM):
+def chat_page(rag: Rag, llm: LLM):
     """チャットボットのページ"""
     st.subheader("💬 Chatbot")
 
@@ -27,8 +24,10 @@ def chat_page(llm: LLM):
 
         with st.chat_message("assistant"):
             placeholder = st.empty()
-            response: str = llm.get_response_with_context(
-                st.session_state.chat_history, placeholder
+            rag_result = asyncio.run(rag.search(prompt, "全学教育推進機構"))
+            st.write(rag_result)
+            response = llm.get_response_with_context(
+                st.session_state.chat_history, placeholder, rag_result
             )
 
         st.session_state.chat_history.append(
@@ -63,34 +62,30 @@ def explanation_page():
         )
 
 
-def csv_page():
-    """CSVデータのページ"""
-    st.subheader("📊 RAGデータビュー")
-    st.write("現在格納されているデータを確認できます。")
-
-    df = load_csv()
-    st.dataframe(df)
-
-
-def initialize():
+async def initialize() -> tuple[RagV1, LLM]:
     """session_stateの初期化"""
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
+    client = SupabaseClient()
+    insert_client = await InsertSupabase.new(client)
+    search_client = await SearchSupabase.new(client)
+    embedding_client = OpenAIEmbedding()
+    rag = RagV1(insert_client, search_client, embedding_client)
+    llm = GeminiLLM()
+
+    return rag, llm
+
 
 if __name__ == "__main__":
-    initialize()
-    llm = LLM()
+    rag_client, llm_client = asyncio.run(initialize())
 
     # タブの作成
-    tab1, tab2, tab3 = st.tabs(["💬 Chatbot", "📚 概要", "📊 RAGデータ"])
+    tab1, tab2 = st.tabs(["💬 Chatbot", "📚 概要"])
 
     # タブの切り替え
     with tab1:
-        chat_page(llm)
+        chat_page(rag_client, llm_client)
 
     with tab2:
         explanation_page()
-
-    with tab3:
-        csv_page()

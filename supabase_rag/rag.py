@@ -4,7 +4,7 @@ from abc import ABCMeta, abstractmethod
 from supabase_rag.client import SupabaseClient
 from supabase_rag.embedding import Embedding, OpenAIEmbedding
 from supabase_rag.insert import Insert, InsertSupabase
-from supabase_rag.model import Category, Document, FullText
+from supabase_rag.model import Category, Document, FullText, FullTextModel
 from supabase_rag.search import Search, SearchSupabase
 
 
@@ -40,7 +40,7 @@ class Rag(metaclass=ABCMeta):
         raise NotImplementedError()
 
     @abstractmethod
-    async def search(self, query: str, category_name: str):
+    async def search(self, query: str, category_name: str) -> list[FullTextModel]:
         """
         DBから履修情報をsemantic searchするメソッド
         """
@@ -78,7 +78,7 @@ class RagV1(Rag):
     async def insert_full_text(self, text: str) -> int:
         return await self.insert_client.insert_full_text(FullText(content=text))
 
-    async def search(self, query: str, category_name: str):
+    async def search(self, query: str, category_name: str) -> list[FullTextModel]:
         embedding = self.embedding_client.exec(query)
         return await self.search_client.search(embedding, category_name)
 
