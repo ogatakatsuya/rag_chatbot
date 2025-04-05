@@ -40,7 +40,9 @@ class Rag(metaclass=ABCMeta):
         raise NotImplementedError()
 
     @abstractmethod
-    async def search(self, query: str, category_name: str) -> list[FullTextModel]:
+    async def search(
+        self, query: str, category_name: str, limit=10
+    ) -> list[FullTextModel]:
         """
         DBから履修情報をsemantic searchするメソッド
         """
@@ -78,9 +80,11 @@ class RagV1(Rag):
     async def insert_full_text(self, text: str) -> int:
         return await self.insert_client.insert_full_text(FullText(content=text))
 
-    async def search(self, query: str, category_name: str) -> list[FullTextModel]:
+    async def search(
+        self, query: str, category_name: str, limit=10
+    ) -> list[FullTextModel]:
         embedding = self.embedding_client.exec(query)
-        return await self.search_client.search(embedding, category_name)
+        return (await self.search_client.search(embedding, category_name))[:limit]
 
 
 async def main():
