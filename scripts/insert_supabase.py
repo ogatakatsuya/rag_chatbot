@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 import pandas as pd
 
@@ -11,12 +12,13 @@ from supabase_rag.search import SearchSupabase
 # sys.path.append("../scraping/syllabus")
 
 
-async def load_and_embed_csv():
+async def load_and_embed_csv(file_name: str, category_id: int):
     """
     CSVファイルを読み込んで埋め込みを行い、JSONで保存する
     """
     # CSVの読み込み
-    csv_path = "./scraping/syllabus/multilingual.csv"
+    csv_folder = "./scraping/syllabus"
+    csv_path = os.path.join(csv_folder, file_name)
     data = pd.read_csv(csv_path)
 
     # 曜日・時間の整形
@@ -45,12 +47,10 @@ async def load_and_embed_csv():
 
         texts = [full_text, info_text, instructor_text, content_text]
 
-        await insert_data(texts)
+        await insert_data(texts, category_id)
 
 
-async def insert_data(
-    texts: list[str],
-):
+async def insert_data(texts: list[str], category_id: int):
     """
     データを挿入する
 
@@ -63,8 +63,6 @@ async def insert_data(
     embedding_client = OpenAIEmbedding()
 
     rag = RagV1(insert_client, search_client, embedding_client)
-
-    category_id = 2  # カテゴリIDを指定
     full_text_id = await rag.insert_full_text(texts[0])
     for doc in texts:
         document_id = await rag.insert_document(
@@ -122,4 +120,21 @@ def format_schedule(schedule: str) -> str:
 
 
 if __name__ == "__main__":
-    asyncio.run(load_and_embed_csv())
+    embedding_csvs = [
+        ("bungaku.csv", 4),
+        ("ningenkagaku.csv", 5),
+        ("hougaku.csv", 6),
+        ("keizaigaku.csv", 7),
+        ("rigaku.csv", 8),
+        ("igaku_igakuka.csv", 9),
+        ("igaku_hoken.csv", 10),
+        ("shigaku.csv", 11),
+        ("yakugaku.csv", 12),
+        ("kogaku.csv", 13),
+        ("gaigo.csv", 14),
+    ]
+
+    for file_name, category_id in embedding_csvs:
+        print(f"Embedding {file_name}...")
+        asyncio.run(load_and_embed_csv(file_name, category_id))
+        print(f"Finished embedding {file_name}.")
