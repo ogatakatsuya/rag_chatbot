@@ -42,7 +42,7 @@ class SearchSupabase(Search):
             "search_full_texts",
             {
                 "category_name": category_name,
-                "embedding": query,
+                "query": query,
             },
         ).execute()
         return [FullText(**item) for item in res.data]
