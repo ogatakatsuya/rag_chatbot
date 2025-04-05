@@ -9,21 +9,3 @@ services:
     command: [ "streamlit", "run", "src/gui.py", "--server.port=8501", "--server.address=0.0.0.0" ]
     volumes:
       - .:/workspace
-    depends_on:
-      - weaviate
-  weaviate:
-    image: semitechnologies/weaviate:latest
-    restart: always
-    ports:
-      - "8080:8080"
-      - "50051:50051"
-    environment:
-      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
-      PERSISTENCE_DATA_PATH: "/var/lib/weaviate"
-      DEFAULT_VECTORIZER_MODULE: "text2vec-openai"
-      ENABLE_MODULES: "text2vec-openai"
-      CLUSTER_HOSTNAME: "node1"
-    volumes:
-      - weaviate_data:/var/lib/weaviate # 名前付きボリュームを作成し、マウント
-volumes:
-  weaviate_data: # 名前付きボリュームを定義
