@@ -5,16 +5,24 @@ CREATE FUNCTION search_full_texts(
 ) 
 RETURNS TABLE (
     id      integer,
-    content TEXT
+    content TEXT,
+    similarity float
 ) 
 LANGUAGE SQL STABLE
 AS $$
-    SELECT
-        documents.id, full_texts.content
-    FROM documents
-    join categories on documents.category_id = categories.id
-    join full_texts on documents.full_text_id = full_texts.id
-    where categories.name = category_name
-    ORDER BY documents.embedding <=> query ASC
-    LIMIT 5;
+    SELECT DISTINCT
+        b.full_text_id, b.content, b.similarity
+    FROM (
+        SELECT  
+            documents.full_text_id, 
+            full_texts.content,
+            documents.embedding <=>query as similarity
+        FROM documents
+        JOIN categories ON documents.category_id = categories.id
+        JOIN full_texts ON documents.full_text_id = full_texts.id
+        WHERE categories.name = category_name
+        ORDER BY similarity
+        LIMIT 15
+    ) AS b
+    ORDER BY b.similarity ASC;
 $$;

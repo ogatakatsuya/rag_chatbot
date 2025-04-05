@@ -16,12 +16,12 @@ async def load_and_embed_csv():
     CSVファイルを読み込んで埋め込みを行い、JSONで保存する
     """
     # CSVの読み込み
-    csv_path = "./scraping/syllabus/zengaku.csv"
+    csv_path = "./scraping/syllabus/multilingual.csv"
     data = pd.read_csv(csv_path)
 
     # 曜日・時間の整形
     data["day_and_period"] = data["day_and_period"].apply(format_schedule)
-    data["course_code"] = data["course_code"].str.extract(r"(\d+)")
+    data["course_code"] = data["course_code"].astype(str).str.extract(r"(\d+)")
 
     for i, row in data.iterrows():
         # 前処理: 1授業につき全文と履修の情報と履修の内容の4種類を埋め込み
@@ -64,7 +64,7 @@ async def insert_data(
 
     rag = RagV1(insert_client, search_client, embedding_client)
 
-    category_id = 1  # カテゴリIDを指定
+    category_id = 2  # カテゴリIDを指定
     full_text_id = await rag.insert_full_text(texts[0])
     for doc in texts:
         document_id = await rag.insert_document(
