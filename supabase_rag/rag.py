@@ -117,8 +117,8 @@ async def main2():
     rag = RagV1(insert_client, search_client, embedding_client)
 
     result = await rag.search(
-        query="スポーツ",
-        category_name="全学教育推進機構",
+        query="成田修",
+        category_name="マルチリンガル教育センター",
     )
     for item in result:
         print(f"result{item.id} : {item.content}")

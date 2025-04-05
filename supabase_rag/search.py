@@ -49,4 +49,6 @@ class SearchSupabase(Search):
                 "query": query,
             },
         ).execute()
-        return [FullTextModel(**item) for item in res.data]
+        return [
+            FullTextModel(id=item["id"], content=item["content"]) for item in res.data
+        ]
