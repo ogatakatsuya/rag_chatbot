@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 from supabase import AsyncClient
 
 from supabase_rag.client import DBAsyncClient
-from supabase_rag.model import FullText
+from supabase_rag.model import FullTextModel
 
 
 class Search(metaclass=ABCMeta):
@@ -13,7 +13,9 @@ class Search(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    async def search(self, query: list[float], category_name: str) -> list[FullText]:
+    async def search(
+        self, query: list[float], category_name: str
+    ) -> list[FullTextModel]:
         """
         DBから履修情報をsemantic searchするメソッド
         """
@@ -34,7 +36,9 @@ class SearchSupabase(Search):
         conn = await client.get_client()
         return cls(conn)
 
-    async def search(self, query: list[float], category_name: str) -> list[FullText]:
+    async def search(
+        self, query: list[float], category_name: str
+    ) -> list[FullTextModel]:
         """
         DBから履修情報をsemantic searchするメソッド
         """
@@ -45,4 +49,4 @@ class SearchSupabase(Search):
                 "query": query,
             },
         ).execute()
-        return [FullText(**item) for item in res.data]
+        return [FullTextModel(**item) for item in res.data]

@@ -1,19 +1,20 @@
 /* semantic searchをするための関数 */
 CREATE FUNCTION search_full_texts(
     category_name TEXT,
-    embedding VECTOR
+    query halfvec
 ) 
 RETURNS TABLE (
+    id      integer,
     content TEXT
 ) 
 LANGUAGE SQL STABLE
 AS $$
-    SELECT 
-        full_texts.content
+    SELECT
+        documents.id, full_texts.content
     FROM documents
-    JOIN categories ON documents.category_id = categories.id
-    JOIN full_texts ON documents.full_text_id = full_texts.id
-    WHERE categories.name = category_name
-    ORDER BY documents.embedding <-> embedding
+    join categories on documents.category_id = categories.id
+    join full_texts on documents.full_text_id = full_texts.id
+    where categories.name = category_name
+    ORDER BY documents.embedding <=> query ASC
     LIMIT 5;
 $$;
