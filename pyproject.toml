@@ -6,24 +6,20 @@ authors = ["Ogata Katsuya <130939004+ogatakatsuya@users.noreply.github.com>"]
 readme = "README.md"
 packages = [
     { include = "src" }, 
-    { include = "rag" },
-    { include = "lib" }
+    { include = "lib" },
+    { include = "supabase_rag" }
 ]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 streamlit = "^1.33.0"
 google-genai = "^1.0.0"
-python-dotenv = "^1.0.1"
 openai = "^1.61.1"
 pandas = "^2.2.3"
-faiss-cpu = "^1.10.0"
 numpy = "^2.2.2"
 jinja2 = "^3.1.5"
 beautifulsoup4 = "^4.13.3"
 selenium = "^4.29.0"
-weaviate = "^0.1.2"
-weaviate-client = "^4.11.2"
 supabase = "^2.15.0"
 pydantic-settings = "^2.8.1"
 
