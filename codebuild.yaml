@@ -1,6 +1,6 @@
 substitutions:
   _REGION: 'asia-northeast1'
-  _CONTAINER: '${_REGION}-docker.pkg.dev/${PROJECT_ID}/streamlit/${REPO_NAME}:${SHORT_SHA}'
+  _CONTAINER: '${_REGION}-docker.pkg.dev/${PROJECT_ID}/rag-chat-streamlit/${REPO_NAME}:${SHORT_SHA}'
   _SERVICE_NAME: 'ou-chatbot'
 options:
   automapSubstitutions: true
