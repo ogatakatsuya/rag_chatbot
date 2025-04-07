@@ -6,6 +6,7 @@ import pandas as pd
 from supabase_rag.client import SupabaseClient
 from supabase_rag.embedding import OpenAIEmbedding
 from supabase_rag.insert import InsertSupabase
+from supabase_rag.model import EmbedType
 from supabase_rag.rag import RagV1
 from supabase_rag.search import SearchSupabase
 
@@ -23,7 +24,9 @@ async def load_and_embed_csv(file_name: str, category_id: int):
 
     # 曜日・時間の整形
     data["day_and_period"] = data["day_and_period"].apply(format_schedule)
-    data["course_code"] = data["course_code"].astype(str).str.extract(r"(\d+)")
+    data["course_code"] = (
+        data["course_code"].astype(str).str.split("(", n=1, expand=True)[0]
+    )
 
     for i, row in data.iterrows():
         # 前処理: 1授業につき全文と履修の情報と履修の内容の4種類を埋め込み
@@ -45,12 +48,19 @@ async def load_and_embed_csv(file_name: str, category_id: int):
 
         content_text = f"「{row['course_name_jp']}」は、{row['course_objectives']} "
 
-        texts = [full_text, info_text, instructor_text, content_text]
+        texts = [
+            (full_text, EmbedType.FULL_TEXT),
+            (info_text, EmbedType.INFO_TEXT),
+            (instructor_text, EmbedType.INSTRUCTOR_TEXT),
+            (content_text, EmbedType.CONTENT_TEXT),
+        ]
 
-        await insert_data(texts, category_id)
+        await insert_data(texts, category_id, row["course_code"])
 
 
-async def insert_data(texts: list[str], category_id: int):
+async def insert_data(
+    texts: list[tuple[str, EmbedType]], category_id: int, course_code: str
+):
     """
     データを挿入する
 
@@ -63,10 +73,10 @@ async def insert_data(texts: list[str], category_id: int):
     embedding_client = OpenAIEmbedding()
 
     rag = RagV1(insert_client, search_client, embedding_client)
-    full_text_id = await rag.insert_full_text(texts[0])
-    for doc in texts:
+    full_text_id = await rag.insert_full_text(texts[0][0], category_id, course_code)
+    for doc, type in texts:
         document_id = await rag.insert_document(
-            text=doc, category_id=category_id, full_text_id=full_text_id
+            text=doc, type=type, full_text_id=full_text_id
         )
         print(f"Inserted document with ID: {document_id}")
 
@@ -121,16 +131,19 @@ def format_schedule(schedule: str) -> str:
 
 if __name__ == "__main__":
     embedding_csvs = [
+        ("zengaku.csv", 1),
+        ("multilingual.csv", 2),
+        ("kisokou_ver2.csv", 3),
         ("bungaku.csv", 4),
         ("ningenkagaku.csv", 5),
         ("hougaku.csv", 6),
         ("keizaigaku.csv", 7),
-        ("rigaku.csv", 8),
+        ("rigaku_ver2.csv", 8),
         ("igaku_igakuka.csv", 9),
         ("igaku_hoken.csv", 10),
         ("shigaku.csv", 11),
         ("yakugaku.csv", 12),
-        ("kogaku.csv", 13),
+        ("kogaku_ver2.csv", 13),
         ("gaigo.csv", 14),
     ]
 

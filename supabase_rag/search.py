@@ -50,5 +50,11 @@ class SearchSupabase(Search):
             },
         ).execute()
         return [
-            FullTextModel(id=item["id"], content=item["content"]) for item in res.data
+            FullTextModel(
+                id=item["id"],
+                content=item["content"],
+                category_id=item["category_id"],
+                course_code=item["course_code"],
+            )
+            for item in res.data
         ]
