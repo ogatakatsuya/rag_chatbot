@@ -4,7 +4,7 @@ from abc import ABCMeta, abstractmethod
 from supabase_rag.client import SupabaseClient
 from supabase_rag.embedding import Embedding, OpenAIEmbedding
 from supabase_rag.insert import Insert, InsertSupabase
-from supabase_rag.model import Category, Document, FullText, FullTextModel
+from supabase_rag.model import Category, Document, EmbedType, FullText, FullTextModel
 from supabase_rag.search import Search, SearchSupabase
 
 
@@ -18,7 +18,7 @@ class Rag(metaclass=ABCMeta):
 
     @abstractmethod
     async def insert_document(
-        self, text: str, category_id: int, full_text_id: int
+        self, text: str, type: EmbedType, full_text_id: int
     ) -> int:
         """
         DBに履修情報を挿入するメソッド
@@ -33,7 +33,7 @@ class Rag(metaclass=ABCMeta):
         raise NotImplementedError()
 
     @abstractmethod
-    async def insert_full_text(self, text: str):
+    async def insert_full_text(self, text: str, category_id: int, course_code: str):
         """
         DBに履修情報の全文を挿入するメソッド
         """
@@ -62,14 +62,13 @@ class RagV1(Rag):
         self.embedding_client = embedding_client
 
     async def insert_document(
-        self, text: str, category_id: int, full_text_id: int
+        self, text: str, type: EmbedType, full_text_id: int
     ) -> int:
         embedding = self.embedding_client.exec(text)
         return await self.insert_client.insert_document(
             Document(
-                content=text,
                 embedding=embedding,
-                category_id=category_id,
+                type=type.value,
                 full_text_id=full_text_id,
             )
         )
@@ -77,8 +76,12 @@ class RagV1(Rag):
     async def insert_category(self, name: str) -> int:
         return await self.insert_client.insert_category(Category(name=name))
 
-    async def insert_full_text(self, text: str) -> int:
-        return await self.insert_client.insert_full_text(FullText(content=text))
+    async def insert_full_text(
+        self, text: str, category_id: int, course_code: str
+    ) -> int:
+        return await self.insert_client.insert_full_text(
+            FullText(content=text, category_id=category_id, course_code=course_code)
+        )
 
     async def search(
         self, query: str, category_name: str, limit=10
@@ -104,10 +107,10 @@ async def main():
         "Example Document 5",
     ]
     category_id = await rag.insert_category("Example Category")
-    full_text_id = await rag.insert_full_text("Example Full Text")
+    full_text_id = await rag.insert_full_text("Example Full Text", 1, "CS101")
     for doc in documents:
         document_id = await rag.insert_document(
-            text=doc, category_id=category_id, full_text_id=full_text_id
+            text=doc, type=EmbedType.FULL_TEXT, full_text_id=full_text_id
         )
     print(f"Inserted document with ID: {document_id}")
 

@@ -1,8 +1,16 @@
 from datetime import datetime
+from enum import Enum
 
 from pydantic import BaseModel, Field
 
 EMBEDDING_DIM = 1536
+
+
+class EmbedType(Enum):
+    FULL_TEXT = "full_text"
+    INFO_TEXT = "info_text"
+    INSTRUCTOR_TEXT = "instructor_text"
+    CONTENT_TEXT = "content_text"
 
 
 class Category(BaseModel):
@@ -36,6 +44,8 @@ class FullText(BaseModel):
     """
 
     content: str
+    category_id: int
+    course_code: str
 
 
 class FullTextModel(FullText):
@@ -60,10 +70,9 @@ class Document(BaseModel):
         embedding(list[float]): ドキュメントの埋め込み
     """
 
-    content: str
     embedding: list[float] = Field(min_length=EMBEDDING_DIM, max_length=EMBEDDING_DIM)
-    category_id: int
     full_text_id: int
+    type: str
 
 
 class DocumentModel(Document):
