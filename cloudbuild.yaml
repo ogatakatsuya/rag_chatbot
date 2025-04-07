@@ -26,3 +26,8 @@ steps:
     - --port=8501
     - --ingress=all
     - --allow-unauthenticated
+    - --update-secrets=OPENAI_API_KEY=openai-key:latest
+    - --update-secrets=GEMINI_API_KEY=gemini-key:latest
+    - --update-secrets=GEMINI_PROJECT_NUMBER=gemini-project-number:latest
+    - --update-secrets=SUPABASE_URL=supabase-url:latest
+    - --update-secrets=SUPABASE_KEY=supabase-key:latest
