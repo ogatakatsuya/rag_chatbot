@@ -19,3 +19,5 @@ ENV STREAMLIT_SERVER_HEADLESS true
 RUN curl -sSL https://install.python-poetry.org | python3 - \
     && poetry config virtualenvs.create false \
     && poetry install
+
+ENTRYPOINT ["streamlit", "run", "src/gui.py"]
